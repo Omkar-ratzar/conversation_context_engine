@@ -5,6 +5,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import java.util.List;
+import java.util.ArrayList;
+import com.mkxrs.ollama_api.dto.Message;
+
 @Service
 public class OllamaClient {
 
@@ -20,21 +24,22 @@ public class OllamaClient {
         this.model = model;
     }
 
-    public String generate_reply(String prompt) {
+    public String chat(List<Message> history) {
 
         Map<String, Object> body = Map.of(
             "model", model,
-            "prompt", prompt,
+            "messages", history,
             "stream", false
         );
 
         Map response = webClient.post()
-            .uri("/api/generate")
+            .uri("/api/chat")
             .bodyValue(body)
             .retrieve()
             .bodyToMono(Map.class)
             .block();
-
-        return (String) response.get("response");
+        Map message=(Map) response.get("message");
+        
+        return (String) message.get("content");
     }
 }
